@@ -1,0 +1,18 @@
+{
+    "name": "Micro Center Benchmarks",
+    "description": "Displays related benchmarks on microcenter.com",
+    "version": "1.0",
+    "manifest_version": 2,
+    "content_scripts": [
+        {
+          "matches": ["*://*.microcenter.com/product/*"],
+          "js": ["node_modules/jquery/dist/jquery.min.js", "node_modules/fuse.js/dist/fuse.min.js", "benchmarks.js"],
+          "css": ["benchmarks.css"]
+        }
+      ],
+    "web_accessible_resources" : [
+        "cpus.json",
+        "gpus.json"
+    ],
+    "permissions": [ "storage",  "*://*.microc.bbarrett.me/*" ]
+  }

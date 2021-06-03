@@ -1,0 +1,77 @@
+#tab-benchmarks .content-wrapper {
+    background: url(https://90a1c75758623581b3f8-5c119c3de181c9857fcb2784776b17ef.ssl.cf2.rackcdn.com/images_sf_feature_bgNEW.jpg) repeat-x;
+    padding: 14px 15px;
+}
+
+.benchmark-info {
+    display: flex;
+    justify-content: space-around;
+}
+
+.benchmark-info > div {
+    display: flex;
+    align-content: center;
+    flex-direction: column;
+    border: 1px solid #d7d3d0;
+    border-radius: 8px 8px 8px 8px;
+    -moz-border-radius: 8px 8px 8px 8px;
+    -webkit-border-radius: 8px 8px 8px 8px;
+    margin: 1em;
+}
+
+.benchmark-info h3 {
+    text-align: center;
+    border-bottom: 1px solid #d7d3d0;
+    margin: 0;
+    padding: 1em 0em;
+}
+
+.benchmark-item {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: 1em;
+}
+
+.tabs article a.benchmark-item:hover , .tabs article a.benchmark-item {
+    color:black;
+    text-decoration: none;
+}
+.benchmark-item-picture {
+    padding: 0px 10px 0px 0px;
+}
+
+.benchmark-item-picture img {
+    width: 50px;
+    height: auto;
+    mix-blend-mode: multiply;
+}
+
+.benchmark-item-name {
+    margin-right: 1em;
+    width: 150px;
+}
+
+.benchmark-item-price {
+    flex-grow: 1;
+    text-align: end;
+    margin-right: 1em;
+}
+
+.benchmark-item-value {
+    flex-grow: 1;
+    text-align: end;
+}
+
+.benchmark-item-below {
+    background: #ff00004f;
+}
+
+.benchmark-item-above {
+    background: #0080004f;
+}
+
+.benchmark-item-standout {
+    border: 2px dashed black;
+    margin: -1px;
+}

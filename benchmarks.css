@@ -75,3 +75,7 @@
     border: 2px dashed black;
     margin: -1px;
 }
+
+.benchmark-footer {
+    text-align: right;
+}

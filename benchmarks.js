@@ -297,6 +297,12 @@ function Display(product, nameField, fields, collections) {
             ).join('\n')}
         </div>
     `);
+
+    $("#tab-benchmarks > div").append(`
+            <div class="benchmark-footer">
+                <h3>Benchmark scores referenced from <a href="https://www.cpubenchmark.net/">PassMark.</a></h3>
+            </div>
+    `);
 }
 
 function ConsolidateItems(products, benchmarks, nameSpec, fields, importantCharacters)

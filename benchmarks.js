@@ -7,7 +7,6 @@ document.body.style.border = "5px solid blue";
 let storeId = "141";
 
 function Init() {
-
     storeId = $("#storeInfo").attr("data-store");
 
     SetupBenchmark(
@@ -264,8 +263,14 @@ function Display(product, nameField, fields, collections) {
             cssClass += " benchmark-item-standout";
         }
 
+        //regex trickery to get first component of path to match
+        var url = other.url;
+        var regex = /\/.*?\//
+        var match = window.location.pathname.match(regex);
+        url = url.replace(regex, match[0]);
+
         return `
-        <a class="benchmark-item ${cssClass}" href="${other.url}" title="${other[field]}">
+        <a class="benchmark-item ${cssClass}" href="${url}" title="${other[field]}">
             <div class="benchmark-item-picture">
                 <img src="${other.pictureUrls[0]}"/>
             </div>

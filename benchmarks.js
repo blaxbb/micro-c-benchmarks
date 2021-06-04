@@ -6,7 +6,10 @@ $(function(){
 let storeId = "141";
 
 function Init() {
-    storeId = $("#storeInfo").attr("data-store");
+    var sid = $("#storeInfo").attr("data-store");
+    if (sid != undefined) {
+      storeId = sid;
+    }
 
     SetupBenchmark(
         "Processor",

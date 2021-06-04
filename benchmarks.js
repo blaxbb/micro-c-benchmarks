@@ -4,8 +4,12 @@ $(function(){
 });
 
 document.body.style.border = "5px solid blue";
+let storeId = "141";
 
 function Init() {
+
+    storeId = $("#storeInfo").attr("data-store");
+
     SetupBenchmark(
         "Processor",
         "4294966995",
@@ -43,15 +47,15 @@ function SetupBenchmark(nameSpec, category, filename, benchmarkFields, displayFi
     GetCurrentName(nameSpec)
         .then(() => GetCachedResults(nameSpec))
         .then(data => {
-            const oneDayMs = 1000 * 60 * 60 * 12;
-            if(data.hasOwnProperty(nameSpec) && new Date() - data[nameSpec].time < oneDayMs) {
+            const cacheLife = 1000 * 60 * 60 * 12;
+            if(data.hasOwnProperty(nameSpec) && new Date() - data[nameSpec].time < cacheLife) {
                 SetupCachedBenchmark(data, nameSpec, displayFields, importantCharacters);
             }
             else {
                 SetupUncachedBenchmark(nameSpec, category, filename, benchmarkFields, displayFields, minYear, importantCharacters);
             }
         }
-    );
+    ).catch(error => {}); //error here should be because we are on a different product category page;;;
 }
 
 function SetupCachedBenchmark(data, nameSpec, displayFields, importantCharacters) {
@@ -113,7 +117,7 @@ function SetupUncachedBenchmark(nameSpec, category, filename, benchmarkFields, d
                         )
                     )
             )
-    ).catch(error => {}); //error here should be because we are on a different product category page
+    );
 }
 
 function SetCacheResults(nameSpec, items) {
@@ -206,7 +210,7 @@ function FindMatch(name, data, importantCharacters)
 
 function LoadCategory(category) {
     console.log(`LOAD ${category}`);
-    return fetch(`https://microc.bbarrett.me/MicroCenterProxy/searchAll?storeId=141&categoryFilter=${category}`, {
+    return fetch(`https://microc.bbarrett.me/MicroCenterProxy/searchAll?storeId=${storeId}&categoryFilter=${category}`, {
         "credentials": "omit",
         "headers": {
             "Accept": "application/json",
@@ -226,6 +230,7 @@ function LoadBenchmarks(filename, minYear)
 {
     console.log(`LOAD BENCHMARKS ${filename}`);
     var url = browser.runtime.getURL(filename);
+
     return fetch(url)
         .then(response => response.json())
         .then(data => {
@@ -277,7 +282,7 @@ function Display(product, nameField, fields, collections) {
             <div class="benchmark-item-value">
                 ${(((other[field] - product[field]) / product[field]) * 100).toFixed(1)}%
             </div>
-        </a>`
+        </a>`;
     }
 
     $("#tab-benchmarks > div").append(`

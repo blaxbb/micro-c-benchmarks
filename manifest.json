@@ -6,7 +6,7 @@
     "content_scripts": [
         {
           "matches": ["*://*.microcenter.com/product/*"],
-          "js": ["node_modules/jquery/dist/jquery.min.js", "node_modules/fuse.js/dist/fuse.min.js", "benchmarks.js"],
+          "js": ["jquery.min.js", "fuse.min.js", "benchmarks.js"],
           "css": ["benchmarks.css"]
         }
       ],

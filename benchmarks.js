@@ -3,7 +3,6 @@ $(function(){
     Init();
 });
 
-document.body.style.border = "5px solid blue";
 let storeId = "141";
 
 function Init() {
@@ -263,7 +262,7 @@ function Display(product, nameField, fields, collections) {
             cssClass += " benchmark-item-standout";
         }
 
-        //regex trickery to get first component of path to match
+        //regex trickery to force first component of path to match
         var url = other.url;
         var regex = /\/.*?\//
         var match = window.location.pathname.match(regex);

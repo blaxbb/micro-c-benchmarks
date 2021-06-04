@@ -41,34 +41,92 @@ function Init() {
 
 function SetupBenchmark(nameSpec, category, filename, benchmarkFields, displayFields, minYear, importantCharacters) {
     GetCurrentName(nameSpec)
-        .then(productName =>
-            Promise.all([LoadCategory(category), LoadBenchmarks(filename, minYear)])
-                .then(data =>
-                    Promise.all([ReduceItems(data[0], data[1], nameSpec, benchmarkFields, importantCharacters)])
-                        .then(data => {
-                            return {
-                                item: FindMatch(productName, data[0], importantCharacters).item,
-                                allItems: data[0]
-                            }
-                        })
-                        .then(data => {
-                            console.log(data);
-                            return {
-                                item: data.item,
-                                ...Object.fromEntries(
-                                    Object.entries(displayFields).map(([field, name]) => [field, FindSimilar(data.item, data.allItems, field)])
-                                )
-                            };
-                        })
-                        .then(data => Display(
-                                data.item,
-                                nameSpec,
-                                displayFields,
-                                Object.keys(displayFields).map(field => data[field]),
-                            )
-                        )
+        .then(() => GetCachedResults(nameSpec))
+        .then(data => {
+            const oneDayMs = 1000 * 60 * 60 * 12;
+            if(data.hasOwnProperty(nameSpec) && new Date() - data[nameSpec].time < oneDayMs) {
+                SetupCachedBenchmark(data, nameSpec, displayFields, importantCharacters);
+            }
+            else {
+                SetupUncachedBenchmark(nameSpec, category, filename, benchmarkFields, displayFields, minYear, importantCharacters);
+            }
+        }
+    );
+}
+
+function SetupCachedBenchmark(data, nameSpec, displayFields, importantCharacters) {
+    GetCurrentName(nameSpec)
+        .then((productName) => {
+            let items = data[nameSpec].items;
+            return {
+                item: FindMatch(productName, items, importantCharacters).item,
+                allItems: items
+            };
+        }).then(data => {
+            console.log(data);
+            return {
+                item: data.item,
+                ...Object.fromEntries(
+                    Object.entries(displayFields).map(([field, name]) => [field, FindSimilar(data.item, data.allItems, field)])
                 )
-        ).catch(error => {}); //error here should be because we are on a different product category page
+            };
+        }).then(data => Display(
+            data.item,
+            nameSpec,
+            displayFields,
+            Object.keys(displayFields).map(field => data[field]),
+        )
+    );
+}
+
+function SetupUncachedBenchmark(nameSpec, category, filename, benchmarkFields, displayFields, minYear, importantCharacters) {
+    GetCurrentName(nameSpec)
+    .then(productName =>
+        Promise.all([LoadCategory(category), LoadBenchmarks(filename, minYear)])
+            .then(data =>
+                Promise.all([ConsolidateItems(data[0], data[1], nameSpec, benchmarkFields, importantCharacters)])
+                    .then((data) => SetCacheResults(nameSpec, data[0]))
+                    .then((data) => GetCachedResults(nameSpec))
+                    .then(data => {
+                        console.log("FM");
+                        console.log(data);
+                        let items = data[nameSpec].items;
+                        return {
+                            item: FindMatch(productName, items, importantCharacters).item,
+                            allItems: items
+                        }
+                    })
+                    .then(data => {
+                        console.log(data);
+                        return {
+                            item: data.item,
+                            ...Object.fromEntries(
+                                Object.entries(displayFields).map(([field, name]) => [field, FindSimilar(data.item, data.allItems, field)])
+                            )
+                        };
+                    })
+                    .then(data => Display(
+                            data.item,
+                            nameSpec,
+                            displayFields,
+                            Object.keys(displayFields).map(field => data[field]),
+                        )
+                    )
+            )
+    ).catch(error => {}); //error here should be because we are on a different product category page
+}
+
+function SetCacheResults(nameSpec, items) {
+    var obj = {};
+    obj[nameSpec] = {
+        items: items,
+        time: new Date()
+    };
+    return browser.storage.local.set(obj);
+}
+
+function GetCachedResults(nameSpec) {
+    return browser.storage.local.get(nameSpec);
 }
 
 function PruneOldEntries(data, year) {
@@ -121,7 +179,6 @@ function GetCurrentName(nameSpec) {
 
 function FindMatch(name, data, importantCharacters)
 {
-    try{
     const options = {
         includeScore: true,
         ignoreLocation: true,
@@ -140,11 +197,6 @@ function FindMatch(name, data, importantCharacters)
                 return results[i];
             }
         }
-        debugger;
-    }
-    }
-    catch(error)
-    {
         debugger;
     }
     console.log(`FAILED!!! ${name}`);
@@ -246,49 +298,47 @@ function Display(product, nameField, fields, collections) {
     `);
 }
 
-function ReduceItems(products, benchmarks, nameSpec, fields, importantCharacters)
+function ConsolidateItems(products, benchmarks, nameSpec, fields, importantCharacters)
 {
     var results = {};
     return new Promise((resolve, reject) => {
         products.forEach((product, index) => {
             try {
-            if(!product.specs.hasOwnProperty(nameSpec))
-            {
-                return;
-            }
+                if(product.specs.hasOwnProperty(nameSpec)) {
 
-            var name = product.specs[nameSpec];
-            var match = FindMatch(name, benchmarks, importantCharacters);
-            for(var productField in fields)
-            {
-                var benchmarkField = fields[productField];
-                product[productField] = match.item[benchmarkField];
-            }
-            product.DEBUG_DATE = match.item.date;
 
-            if(results.hasOwnProperty(name))
-            {
-                var existing = results[name];
-                if(existing.stock == 0) {
-                    if(product.stock > 0 || product.price < existing.price)
+                    var name = product.specs[nameSpec];
+                    var match = FindMatch(name, benchmarks, importantCharacters);
+                    for(var productField in fields)
+                    {
+                        var benchmarkField = fields[productField];
+                        product[productField] = match.item[benchmarkField];
+                    }
+                    //product.DEBUG_DATE = match.item.date;
+
+                    if(results.hasOwnProperty(name))
+                    {
+                        var existing = results[name];
+                        if(existing.stock == 0) {
+                            if(product.stock > 0 || product.price < existing.price)
+                            {
+                                results[name] = product;
+                            }
+                        }
+                        else if(product.stock > 0 && product.price < existing.price)
+                        {
+                            results[name] = product;
+                        }
+                    }
+                    else
                     {
                         results[name] = product;
                     }
                 }
-                else if(product.stock > 0 && product.price < existing.price)
-                {
-                    results[name] = product;
+                if(index === products.length - 1) {
+                    resolve(Object.values(results));
                 }
             }
-            else
-            {
-                results[name] = product;
-            }
-
-            if(index === products.length - 1) {
-                resolve(Object.values(results));
-            }
-        }
         catch(error)
         {
             console.log(error);
@@ -311,9 +361,27 @@ function FindSimilar(item, collection, field) {
     var endBelow = index;
 
     var startAbove = index + 1;
-    startAbove = startAbove < sorted.length ? startAbove : sorted.length - 1;
+    startAbove = startAbove < sorted.length ? startAbove : sorted.length;
     var endAbove = index + maxItems + 1;
-    endAbove = endAbove < sorted.length ? endAbove : sorted.length - 1;
+    endAbove = endAbove < sorted.length ? endAbove : sorted.length;
+
+
+    var deltaPos = sorted.length - index;
+    var deltaNeg = index;
+    
+    if((maxItems * 2) + 1 > sorted.length) {
+        startBelow = 0;
+        endAbove = sorted.length;
+    }
+    else if(deltaPos < maxItems) {
+        startBelow -= maxItems - deltaPos + 1;
+    }
+    else if(deltaNeg < maxItems) {
+        endAbove += maxItems - deltaNeg;
+    }
+
+
+
 
     return {
         below: sorted.slice(startBelow, endBelow),

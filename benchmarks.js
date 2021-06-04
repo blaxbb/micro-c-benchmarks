@@ -92,8 +92,6 @@ function SetupUncachedBenchmark(nameSpec, category, filename, benchmarkFields, d
                     .then((data) => SetCacheResults(nameSpec, data[0]))
                     .then((data) => GetCachedResults(nameSpec))
                     .then(data => {
-                        console.log("FM");
-                        console.log(data);
                         let items = data[nameSpec].items;
                         return {
                             item: FindMatch(productName, items, importantCharacters).item,
@@ -101,7 +99,6 @@ function SetupUncachedBenchmark(nameSpec, category, filename, benchmarkFields, d
                         }
                     })
                     .then(data => {
-                        console.log(data);
                         return {
                             item: data.item,
                             ...Object.fromEntries(
@@ -230,7 +227,6 @@ function LoadBenchmarks(filename, minYear)
 {
     console.log(`LOAD BENCHMARKS ${filename}`);
     var url = browser.runtime.getURL(filename);
-
     return fetch(url)
         .then(response => response.json())
         .then(data => {
@@ -282,7 +278,7 @@ function Display(product, nameField, fields, collections) {
             <div class="benchmark-item-value">
                 ${(((other[field] - product[field]) / product[field]) * 100).toFixed(1)}%
             </div>
-        </a>`;
+        </a>`
     }
 
     $("#tab-benchmarks > div").append(`

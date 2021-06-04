@@ -14,5 +14,8 @@
         "cpus.json",
         "gpus.json"
     ],
-    "permissions": [ "storage",  "*://*.microc.bbarrett.me/*" ]
-  }
+    "permissions": [ "storage",  "*://*.microc.bbarrett.me/*" ],
+    "icons": {
+      "48": "icon.png"
+    }
+}

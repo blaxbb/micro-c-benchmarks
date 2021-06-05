@@ -1,8 +1,3 @@
-(function(){
-    console.log("READY");
-    Init();
-});
-
 let storeId = "141";
 
 function Init() {
@@ -119,42 +114,16 @@ function SetupUncachedBenchmark(nameSpec, category, filename, benchmarkFields, d
 }
 
 function SetCacheResults(nameSpec, items) {
-    return new Promise((resolve, reject) => {
-        var obj = {};
+    var obj = {};
         obj[nameSpec] = {
             items: items,
             time: new Date()
         };
-
-        if(window.browser != undefined) {
-            resolve(window.browser.storage.local.set(obj));
-        }
-        else if (window.chrome != undefined) {
-            window.chrome.storage.local.set(obj, () => {
-                resolve();
-            });
-        }
-        else {
-            reject();
-        }
-
-    });
+    return browser.storage.local.set(obj);
 }
 
 function GetCachedResults(nameSpec) {
-    return new Promise((resolve, reject) => {
-        if(window.browser != undefined) {
-            resolve(window.browser.storage.local.get(nameSpec));
-        }
-        else if (window.chrome != undefined) {
-            window.chrome.storage.local.get(nameSpec, result =>{
-                resolve(result);
-            });
-        }
-        else {
-            reject();
-        }
-    });
+    return browser.storage.local.get(nameSpec);
 }
 
 function PruneOldEntries(data, year) {
@@ -244,13 +213,7 @@ function LoadCategory(category) {
 function LoadBenchmarks(filename, minYear)
 {
     console.log(`LOAD BENCHMARKS ${filename}`);
-    var url = "";
-    if(window.browser != undefined) {
-        url = window.browser.runtime.getURL(filename);
-    }
-    else if (window.chrome != undefined) {
-        url = window.chrome.runtime.getURL(filename);
-    }
+    var url = browser.runtime.getURL(filename);
     return fetch(url)
         .then(response => response.json())
         .then(data => {
@@ -262,11 +225,11 @@ function LoadBenchmarks(filename, minYear)
 
 function Display(product, nameField, fields, collections) {
 
-    document.querySelector("#product-details > li:last-child")
+    document.querySelector("#product-details > ul > li:last-child")
         .insertAdjacentHTML('afterend', `<li class="accTab" role="tab"><a href="#tab-benchmarks" class="tabLink">Benchmarks</a></li>`);
 
     document.querySelector("#product-details > *:last-child")
-        .insertAdjacentElement('afterend', `
+        .insertAdjacentHTML('afterend', `
         <article id="tab-benchmarks" class="rounded" role="tabpanel" aria-hidden="true" style="display: none;">
             <div class="content-wrapper">
                 <h2 class="icons">Benchmarks</h2>
@@ -314,7 +277,7 @@ function Display(product, nameField, fields, collections) {
     }
 
     document.querySelector("#tab-benchmarks > div > *:last-child")
-        .insertAdjacentElement('afterend', `
+        .insertAdjacentHTML('afterend', `
         <div class="benchmark-info">
             ${Object.entries(fields).map((field, index) => {
                 var key = field[0];
@@ -332,7 +295,7 @@ function Display(product, nameField, fields, collections) {
     `);
 
     document.querySelector("#tab-benchmarks > div > *:last-child")
-        .insertAdjacentElement('afterend',`
+        .insertAdjacentHTML('afterend',`
         <div class="benchmark-footer">
             <h3>Benchmark scores referenced from <a href="https://www.cpubenchmark.net/">PassMark.</a></h3>
         </div>
@@ -429,3 +392,9 @@ function FindSimilar(item, collection, field) {
         all: sorted.slice(startBelow, endAbove).reverse()
     };
 }
+
+(function(){
+    console.log("READY");
+
+    Init();
+})();

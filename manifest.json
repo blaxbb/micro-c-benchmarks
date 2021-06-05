@@ -1,12 +1,12 @@
 {
     "name": "Micro Center Benchmarks",
     "description": "Displays related benchmarks on microcenter.com",
-    "version": "1.0",
+    "version": "1.1",
     "manifest_version": 2,
     "content_scripts": [
         {
           "matches": ["*://*.microcenter.com/*product/*"],
-          "js": ["fuse.min.js", "benchmarks.js"],
+          "js": ["fuse.min.js", "benchmarks.js", "browser-polyfill.min.js"],
           "css": ["benchmarks.css"]
         }
       ],

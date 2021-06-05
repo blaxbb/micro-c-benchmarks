@@ -1,4 +1,4 @@
-$(function(){
+(function(){
     console.log("READY");
     Init();
 });
@@ -6,7 +6,7 @@ $(function(){
 let storeId = "141";
 
 function Init() {
-    var sid = $("#storeInfo").attr("data-store");
+    var sid = document.getElementById("storeInfo")?.attributes["data-store"]
     if (sid != undefined) {
       storeId = sid;
     }
@@ -182,26 +182,17 @@ function PruneStringsToNumbers(arr)
     });
 }
 
-function GetCurrentProcessorName(nameSpec)
-{
-    var ele = $(".spec-body div:first-child").filter(function(){ return  $(this).text() == nameSpec});
-    if(ele == null || ele.length == 0)
-    {
-        return null;
-    }
-
-    return ele.parent().children()[1].innerText
-}
-
 function GetCurrentName(nameSpec) {
     return new Promise((resolve, reject) => {
-        var ele = $(".spec-body div:first-child").filter(function(){ return  $(this).text() == nameSpec});
-        if(ele == null || ele.length == 0)
+        var specs = [...document.getElementsByClassName("spec-body")];
+        for(var i = 0; i < specs.length; i++)
         {
-            reject(`Spec ${nameSpec} not found`);
+            var spec = specs[i];
+            if(spec.children[0].innerText == nameSpec){
+                resolve(spec.children[1].innerText);
+            }
         }
-    
-        resolve(ele.parent().children()[1].innerText);
+        reject(`Spec ${nameSpec} not found`);
     });
 }
 
@@ -271,14 +262,16 @@ function LoadBenchmarks(filename, minYear)
 
 function Display(product, nameField, fields, collections) {
 
-    $("#product-details ul").append(`<li class="accTab" role="tab"><a href="#tab-benchmarks" class="tabLink">Benchmarks</a></li>`);
-    $("#product-details").append(`
+    document.querySelector("#product-details > li:last-child")
+        .insertAdjacentHTML('afterend', `<li class="accTab" role="tab"><a href="#tab-benchmarks" class="tabLink">Benchmarks</a></li>`);
+
+    document.querySelector("#product-details > *:last-child")
+        .insertAdjacentElement('afterend', `
         <article id="tab-benchmarks" class="rounded" role="tabpanel" aria-hidden="true" style="display: none;">
             <div class="content-wrapper">
                 <h2 class="icons">Benchmarks</h2>
             </div>
-        </article>`
-    );
+        </article>`);
 
     let getItemDisplay = function(other, field) {
         let cssClass = "";
@@ -320,7 +313,8 @@ function Display(product, nameField, fields, collections) {
         </a>`
     }
 
-    $("#tab-benchmarks > div").append(`
+    document.querySelector("#tab-benchmarks > div > *:last-child")
+        .insertAdjacentElement('afterend', `
         <div class="benchmark-info">
             ${Object.entries(fields).map((field, index) => {
                 var key = field[0];
@@ -337,10 +331,11 @@ function Display(product, nameField, fields, collections) {
         </div>
     `);
 
-    $("#tab-benchmarks > div").append(`
-            <div class="benchmark-footer">
-                <h3>Benchmark scores referenced from <a href="https://www.cpubenchmark.net/">PassMark.</a></h3>
-            </div>
+    document.querySelector("#tab-benchmarks > div > *:last-child")
+        .insertAdjacentElement('afterend',`
+        <div class="benchmark-footer">
+            <h3>Benchmark scores referenced from <a href="https://www.cpubenchmark.net/">PassMark.</a></h3>
+        </div>
     `);
 }
 
@@ -351,7 +346,6 @@ function ConsolidateItems(products, benchmarks, nameSpec, fields, importantChara
         products.forEach((product, index) => {
             try {
                 if(product.specs.hasOwnProperty(nameSpec)) {
-
 
                     var name = product.specs[nameSpec];
                     var match = FindMatch(name, benchmarks, importantCharacters);

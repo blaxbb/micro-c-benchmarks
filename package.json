@@ -1,6 +1,5 @@
 {
   "dependencies": {
-    "fuse.js": "^6.4.6",
-    "jquery": "^3.6.0"
+    "fuse.js": "^6.4.6"
   }
 }

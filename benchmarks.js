@@ -119,16 +119,42 @@ function SetupUncachedBenchmark(nameSpec, category, filename, benchmarkFields, d
 }
 
 function SetCacheResults(nameSpec, items) {
-    var obj = {};
-    obj[nameSpec] = {
-        items: items,
-        time: new Date()
-    };
-    return browser.storage.local.set(obj);
+    return new Promise((resolve, reject) => {
+        var obj = {};
+        obj[nameSpec] = {
+            items: items,
+            time: new Date()
+        };
+
+        if(window.browser != undefined) {
+            resolve(window.browser.storage.local.set(obj));
+        }
+        else if (window.chrome != undefined) {
+            window.chrome.storage.local.set(obj, () => {
+                resolve();
+            });
+        }
+        else {
+            reject();
+        }
+
+    });
 }
 
 function GetCachedResults(nameSpec) {
-    return browser.storage.local.get(nameSpec);
+    return new Promise((resolve, reject) => {
+        if(window.browser != undefined) {
+            resolve(window.browser.storage.local.get(nameSpec));
+        }
+        else if (window.chrome != undefined) {
+            window.chrome.storage.local.get(nameSpec, result =>{
+                resolve(result);
+            });
+        }
+        else {
+            reject();
+        }
+    });
 }
 
 function PruneOldEntries(data, year) {
@@ -227,7 +253,13 @@ function LoadCategory(category) {
 function LoadBenchmarks(filename, minYear)
 {
     console.log(`LOAD BENCHMARKS ${filename}`);
-    var url = browser.runtime.getURL(filename);
+    var url = "";
+    if(window.browser != undefined) {
+        url = window.browser.runtime.getURL(filename);
+    }
+    else if (window.chrome != undefined) {
+        url = window.chrome.runtime.getURL(filename);
+    }
     return fetch(url)
         .then(response => response.json())
         .then(data => {

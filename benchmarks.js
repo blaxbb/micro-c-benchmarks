@@ -259,40 +259,60 @@ function Display(product, nameField, fields, collections) {
         var match = window.location.pathname.match(regex);
         url = url.replace(regex, match[0]);
 
-        return `
-        <a class="benchmark-item ${cssClass}" href="${url}" title="${other[field]}">
-            <div class="benchmark-item-picture">
-                <img src="${other.pictureUrls[0]}"/>
-            </div>
-            <div class="benchmark-item-name">
-                ${other.specs[nameField]}
-            </div>
-            <div class="benchmark-item-price">
-                $${other.price}
-            </div>
-            <div class="benchmark-item-value">
-                ${(((other[field] - product[field]) / product[field]) * 100).toFixed(1)}%
-            </div>
-        </a>`
+        var element = document.createElement("a");
+        element.className = `benchmark-item ${cssClass}`;
+        element.setAttribute("href", url);
+        element.setAttribute("title", other[field]);
+
+        var imgEle = document.createElement("div");
+        imgEle.className = "benchmark-item-picture";
+
+        var img = document.createElement("img");
+        img.src = other.pictureUrls[0];
+
+        imgEle.append(img);
+        element.append(imgEle);
+
+        var fields = [
+            ["benchmark-item-name", other.specs[nameField]],
+            ["benchmark-item-price", other.price],
+            ["benchmark-item-value", `${(((other[field] - product[field]) / product[field]) * 100).toFixed(1)}%`]
+        ]
+        
+        for(let i = 0; i < fields.length; i++) {
+            let cls = fields[i][0];
+            let val = fields[i][1];
+
+            var ele = document.createElement("div");
+            ele.className = cls;
+            ele.innerText = val;
+            element.append(ele);
+        }
+
+
+        return element;
     }
 
     document.querySelector("#tab-benchmarks > div > *:last-child")
-        .insertAdjacentHTML('afterend', `
-        <div class="benchmark-info">
-            ${Object.entries(fields).map((field, index) => {
-                var key = field[0];
-                var label = field[1];
+        .insertAdjacentHTML('afterend', `<div class="benchmark-info"></div>`);
 
-                return `
-                    <div>
-                        <h3 class="">${label} - ${product[key]}</h3>
-                        ${collections[index].all.map(item => getItemDisplay(item, key)).join("")}
-                    </div>
-                `
-            }
-            ).join('\n')}
-        </div>
-    `);
+    let index = 0;
+    for(const [key, label] of Object.entries(fields)) {
+        let div = document.createElement("div");
+        let h3 = document.createElement("h3");
+        h3.innerText = `${label} - ${product[key]}`;
+        div.appendChild(h3);
+
+        let items = collections[index].all.map(item => getItemDisplay(item, key));
+        document.querySelector(".benchmark-info").append(div);
+        for(let i = 0; i < items.length; i++) {
+            let item = items[i];
+            div.append(item);
+        }
+
+        index++;
+    }
+
 
     document.querySelector("#tab-benchmarks > div > *:last-child")
         .insertAdjacentHTML('afterend',`
